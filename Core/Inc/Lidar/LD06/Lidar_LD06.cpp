@@ -3,18 +3,6 @@
 uint16_t angle_per_step;
 bool flag = 0;
 
-uint8_t* LidarDataProcess(uint8_t* buffer1, uint8_t* buffer2, int header_index){
-    static uint8_t processed_data[47];
-    int memory_left = 47 - header_index;
-    for(int i = 0; i < memory_left; i++){
-        processed_data[i] = buffer1[header_index + i];
-    }
-    for(int i = 0; i < header_index; i++){
-        processed_data[memory_left + i] = buffer2[i];
-    }
-    return processed_data;
-}
-
 
 uint8_t CalCRC8(uint8_t package[], uint8_t len, int header_index)
 {
@@ -43,7 +31,6 @@ LiDARFrameTypeDef AssignValues(uint8_t package[], int header_index)
     }else{
         angle_per_step = (frame.end_angle - frame.start_angle) / (POINT_PER_PACK - 1);
     }
-    
 
     for(int i = 0; i < POINT_PER_PACK; i++)
     {
@@ -56,47 +43,7 @@ LiDARFrameTypeDef AssignValues(uint8_t package[], int header_index)
         }
     }
     
-    
     return frame;
-}
-
-int FindHeaderIndex(uint8_t package[], uint8_t len, int start_index)
-{
-    for(int i = start_index; i < len; i++)
-    {
-        if(package[i] == HEADER)
-        {
-            return i;
-        }
-    }
-    return -1;
-}
-
-void LidarVelCtrl(LiDARFrameTypeDef lidarData, uint8_t speed)
-{
-    static float previous_error = 0;
-    static float integral = 0;
-    static const float Kp = 1.0f;  // Proportional gain
-    static const float Ki = 0.1f;  // Integral gain
-    // static const float Kd = 0.05f; // Derivative gain
-
-    float current_speed = lidarData.speed;
-    float error = speed - current_speed;
-
-    if(integral > 10) integral = 10; // Anti-windup
-    else integral += error;
-
-    // float derivative = error - previous_error;
-
-    float output = Kp * error + Ki * integral;
-
-    if(output > 1000) output = 1000;
-    else if(output < 0) output = 0;
-
-    __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, output);
-
-
-    previous_error = error;
 }
 
 void StoreScanData(std::vector<CartesianPointStructDef>& scanPoints, LiDARFrameTypeDef lidarData)

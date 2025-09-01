@@ -60,11 +60,8 @@ static const uint8_t CrcTable[256] =
  0x5a, 0x06, 0x4b, 0x9c, 0xd1, 0x7f, 0x32, 0xe5, 0xa8
 };
 
-uint8_t* LidarDataProcess(uint8_t* buffer1, uint8_t* buffer2, int header_index);
 uint8_t CalCRC8(uint8_t package[], uint8_t len, int header_index);
 LiDARFrameTypeDef AssignValues(uint8_t package[], int header_index);
-int FindHeaderIndex(uint8_t package[], uint8_t len, int start_index);
-void LidarVelCtrl(LiDARFrameTypeDef lidarData, uint8_t speed);
 void StoreScanData(std::vector<CartesianPointStructDef>& scanPoints, LiDARFrameTypeDef lidarData);
 
 #ifdef __cplusplus
